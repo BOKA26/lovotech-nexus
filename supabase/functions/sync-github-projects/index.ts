@@ -55,12 +55,12 @@ Deno.serve(async (req) => {
 
     // Manual mapping of project names to deployed URLs
     const projectUrlMap: Record<string, string> = {
-      'ong-dadi': 'https://ong-dadi.offotechword.com',
+      'dadi-dignity-compass': 'https://ong-dadi.offotechword.com',
       'flock-folio-app': 'https://flock-folio-app.lovable.app',
-      'chambre-haute': 'https://chambre-haute.lovable.app',
-      'shop': 'https://shop.offotechword.com',
-      'offotechword-shop': 'https://shop.offotechword.com',
-      'offotechword': 'https://offotechword.lovable.app',
+      'chambre-haute-connect': 'https://chambre-haute.lovable.app',
+      'focal-convert': 'https://shop.offotechword.com',
+      'mevos': 'https://offotechword.lovable.app',
+      'ai-for-all-biz': 'https://offotechword.lovable.app',
     };
 
     // Transform and prepare projects for insert

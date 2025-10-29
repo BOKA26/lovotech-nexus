@@ -53,14 +53,27 @@ Deno.serve(async (req) => {
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Manual mapping of project names to deployed URLs
+    const projectUrlMap: Record<string, string> = {
+      'ong-dadi': 'https://ong-dadi.offotechword.com',
+      'flock-folio-app': 'https://flock-folio-app.lovable.app',
+      'chambre-haute': 'https://chambre-haute.lovable.app',
+      'shop': 'https://shop.offotechword.com',
+      'offotechword-shop': 'https://shop.offotechword.com',
+      'offotechword': 'https://offotechword.lovable.app',
+    };
+
     // Transform and prepare projects for insert
     const projects = repos
       .filter(repo => !repo.name.includes('lovotech-nexus')) // Exclude this portfolio itself
       .map(repo => {
-        // Determine the project link - prioritize real deployed sites
+        // Determine the project link - prioritize manual mapping
         let projectLink: string;
         
-        if (repo.homepage && repo.homepage.trim() !== '') {
+        // Check manual mapping first
+        if (projectUrlMap[repo.name]) {
+          projectLink = projectUrlMap[repo.name];
+        } else if (repo.homepage && repo.homepage.trim() !== '') {
           // Use the configured homepage (deployed site)
           projectLink = repo.homepage;
         } else if (repo.name.endsWith('.github.io') || repo.name === 'boka26.github.io') {

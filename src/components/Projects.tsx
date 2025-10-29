@@ -5,9 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const Projects = () => {
   const queryClient = useQueryClient();
+  const [selectedCategory, setSelectedCategory] = useState<string>("Tous");
   
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
@@ -38,6 +40,16 @@ const Projects = () => {
     },
   });
 
+  // Extract unique categories from projects
+  const categories = ["Tous", ...(projects ? Array.from(new Set(projects.flatMap(p => p.tags.filter(tag => 
+    ['ONG & Social', 'Portfolio', 'Business', 'E-commerce', 'Tech & Innovation', 'Intelligence Artificielle', 'Web', 'GitHub'].includes(tag)
+  )))) : [])];
+
+  // Filter projects by selected category
+  const filteredProjects = selectedCategory === "Tous" 
+    ? projects 
+    : projects?.filter(p => p.tags.includes(selectedCategory));
+
   return (
     <section id="projects" className="py-24 bg-gradient-to-b from-secondary/20 to-background">
       <div className="container mx-auto px-4">
@@ -60,6 +72,20 @@ const Projects = () => {
           </Button>
         </div>
 
+        {/* Category filters */}
+        <div className="flex flex-wrap justify-center gap-2 mb-12">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              variant={selectedCategory === category ? "default" : "outline"}
+              size="sm"
+            >
+              {category}
+            </Button>
+          ))}
+        </div>
+
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[1, 2, 3, 4].map((i) => (
@@ -80,9 +106,9 @@ const Projects = () => {
           <div className="text-center py-12">
             <p className="text-muted-foreground">Erreur lors du chargement des projets</p>
           </div>
-        ) : projects && projects.length > 0 ? (
+        ) : filteredProjects && filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <div 
                 key={project.id}
                 className="group rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300"

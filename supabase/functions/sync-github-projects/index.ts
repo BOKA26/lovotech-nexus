@@ -53,45 +53,75 @@ Deno.serve(async (req) => {
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Manual mapping of project names to deployed URLs
-    const projectUrlMap: Record<string, string> = {
-      'dadi-dignity-compass': 'https://ong-dadi.offotechword.com',
-      'flock-folio-app': 'https://flock-folio-app.lovable.app',
-      'chambre-haute-connect': 'https://chambre-haute.lovable.app',
-      'focal-convert': 'https://shop.offotechword.com',
-      'mevos': 'https://offotechword.lovable.app',
-      'ai-for-all-biz': 'https://offotechword.lovable.app',
+    // Manual mapping of project names to deployed URLs and metadata
+    const projectMetadata: Record<string, { url: string; image: string; category: string }> = {
+      'dadi-dignity-compass': {
+        url: 'https://ong-dadi.offotechword.com',
+        image: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&h=600&fit=crop',
+        category: 'ONG & Social'
+      },
+      'flock-folio-app': {
+        url: 'https://flock-folio-app.lovable.app',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop',
+        category: 'Portfolio'
+      },
+      'chambre-haute-connect': {
+        url: 'https://chambre-haute.lovable.app',
+        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop',
+        category: 'Business'
+      },
+      'focal-convert': {
+        url: 'https://shop.offotechword.com',
+        image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&h=600&fit=crop',
+        category: 'E-commerce'
+      },
+      'mevos': {
+        url: 'https://offotechword.lovable.app',
+        image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=600&fit=crop',
+        category: 'Tech & Innovation'
+      },
+      'ai-for-all-biz': {
+        url: 'https://offotechword.lovable.app',
+        image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop',
+        category: 'Intelligence Artificielle'
+      },
     };
 
     // Transform and prepare projects for insert
     const projects = repos
       .filter(repo => !repo.name.includes('lovotech-nexus')) // Exclude this portfolio itself
       .map(repo => {
-        // Determine the project link - prioritize manual mapping
+        // Determine project metadata
+        const metadata = projectMetadata[repo.name];
         let projectLink: string;
+        let projectImage: string;
+        let projectCategory: string;
         
-        // Check manual mapping first
-        if (projectUrlMap[repo.name]) {
-          projectLink = projectUrlMap[repo.name];
+        if (metadata) {
+          projectLink = metadata.url;
+          projectImage = metadata.image;
+          projectCategory = metadata.category;
         } else if (repo.homepage && repo.homepage.trim() !== '') {
-          // Use the configured homepage (deployed site)
           projectLink = repo.homepage;
+          projectImage = `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop`;
+          projectCategory = 'Web';
         } else if (repo.name.endsWith('.github.io') || repo.name === 'boka26.github.io') {
-          // Only construct GitHub Pages URL for actual GitHub Pages repos
           projectLink = `https://boka26.github.io/${repo.name.replace('.github.io', '')}/`;
+          projectImage = `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop`;
+          projectCategory = 'Web';
         } else {
-          // Fallback to GitHub repository link if no deployment exists
           projectLink = repo.html_url;
+          projectImage = `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop`;
+          projectCategory = 'GitHub';
         }
         
         return {
           title: repo.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-          description: repo.description || `Projet ${repo.language || 'GitHub'}`,
-          image: repo.homepage && repo.homepage.includes('unsplash') 
-            ? repo.homepage 
-            : `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop`,
+          description: repo.description || `Projet ${projectCategory}`,
+          image: projectImage,
           tags: [
-            ...(repo.topics || []).slice(0, 3),
+            projectCategory,
+            ...(repo.topics || []).slice(0, 2),
             ...(repo.language ? [repo.language] : [])
           ].slice(0, 4),
           link: projectLink,

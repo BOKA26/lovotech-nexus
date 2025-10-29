@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom est trop long (max 100 caractères)"),
@@ -24,7 +25,7 @@ const Contact = () => {
     message: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form data
@@ -38,7 +39,26 @@ const Contact = () => {
       return;
     }
     
-    // TODO: Integrate with Resend or backend
+    // Save to Supabase
+    const { error } = await supabase
+      .from('contact_submissions')
+      .insert({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        project_type: formData.projectType || null,
+        message: formData.message
+      });
+
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'envoi du message. Veuillez réessayer.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "Message envoyé !",
       description: "Nous vous répondrons dans les plus brefs délais.",

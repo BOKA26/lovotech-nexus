@@ -44,9 +44,6 @@ const Navigation = () => {
                 {item.label}
               </button>
             ))}
-            <Button variant="hero" size="sm">
-              Essayer le chatbot
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -71,9 +68,6 @@ const Navigation = () => {
                   {item.label}
                 </button>
               ))}
-              <Button variant="hero" size="sm" className="w-full">
-                Essayer le chatbot
-              </Button>
             </div>
           </div>
         )}

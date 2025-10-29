@@ -52,7 +52,7 @@ const Projects = () => {
           </div>
         ) : projects && projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {projects.map((project, index) => (
+            {projects.map((project) => (
               <div 
                 key={project.id}
                 className="group rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300"
@@ -65,35 +65,37 @@ const Projects = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
-              
-              <div className="p-6">
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
-                  {project.title}
-                </h3>
-                <p className="text-muted-foreground mb-4">{project.description}</p>
                 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.tags.map((tag, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">{project.description}</p>
+                  
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.tags.map((tag, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <a 
+                    href={project.link}
+                    className="inline-flex items-center gap-2 text-primary hover:text-accent transition-colors font-medium"
+                  >
+                    Voir le projet
+                    <ExternalLink size={16} />
+                  </a>
                 </div>
-                
-                <a 
-                  href={project.link}
-                  className="inline-flex items-center gap-2 text-primary hover:text-accent transition-colors font-medium"
-                >
-                  Voir le projet
-                  <ExternalLink size={16} />
-                </a>
-              </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Aucun projet pour le moment</p>
+            <p className="text-muted-foreground text-lg">
+              Aucun projet pour le moment. Ajoutez vos premiers projets dans Supabase !
+            </p>
           </div>
         )}
       </div>

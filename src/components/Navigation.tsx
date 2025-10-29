@@ -1,9 +1,20 @@
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show back button when scrolled down
+      setShowBackButton(window.scrollY > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -35,6 +46,17 @@ const Navigation = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
+            {showBackButton && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => scrollToSection("hero")}
+                className="gap-2"
+              >
+                <ArrowLeft size={16} />
+                Retour au Portfolio
+              </Button>
+            )}
             {menuItems.map((item) => (
               <button
                 key={item.id}
@@ -62,6 +84,17 @@ const Navigation = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-4">
+              {showBackButton && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => scrollToSection("hero")}
+                  className="gap-2 w-full"
+                >
+                  <ArrowLeft size={16} />
+                  Retour au Portfolio
+                </Button>
+              )}
               {menuItems.map((item) => (
                 <button
                   key={item.id}

@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
           ...(repo.topics || []).slice(0, 3),
           ...(repo.language ? [repo.language] : [])
         ].slice(0, 4),
-        link: repo.html_url,
+        link: repo.homepage || repo.html_url,
         created_at: repo.created_at
       }));
 

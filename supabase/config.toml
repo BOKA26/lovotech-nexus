@@ -2,6 +2,3 @@ project_id = "psvxciccmshwdbuifkje"
 
 [functions.chat-offotechword]
 verify_jwt = false
-
-[functions.sync-github-projects]
-verify_jwt = false

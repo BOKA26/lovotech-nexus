@@ -4,6 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const contactSchema = z.object({
+  name: z.string().trim().min(1, "Le nom est requis").max(100, "Le nom est trop long (max 100 caractères)"),
+  email: z.string().trim().email("Email invalide").max(255, "L'email est trop long"),
+  phone: z.string().trim().max(20, "Le numéro est trop long").optional().or(z.literal("")),
+  projectType: z.string().trim().max(100, "Le type de projet est trop long").optional().or(z.literal("")),
+  message: z.string().trim().min(10, "Le message doit contenir au moins 10 caractères").max(2000, "Le message est trop long (max 2000 caractères)")
+});
 
 const Contact = () => {
   const { toast } = useToast();
@@ -17,6 +26,18 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const result = contactSchema.safeParse(formData);
+    if (!result.success) {
+      toast({
+        title: "Erreur de validation",
+        description: result.error.errors[0].message,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // TODO: Integrate with Resend or backend
     toast({
       title: "Message envoyé !",

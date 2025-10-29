@@ -30,13 +30,13 @@ Deno.serve(async (req) => {
       throw new Error('GITHUB_TOKEN not configured');
     }
 
-    console.log('Fetching GitHub repos for BOKA26...');
+    console.log('Fetching GitHub repos for authenticated user via /user/repos...');
 
-    // Fetch repos from GitHub API
-    const githubResponse = await fetch('https://api.github.com/users/BOKA26/repos?sort=updated&per_page=100', {
+    // Fetch repos from GitHub API using the authenticated endpoint to include private repos
+    const githubResponse = await fetch('https://api.github.com/user/repos?per_page=100&affiliation=owner,collaborator,organization_member', {
       headers: {
         'Authorization': `Bearer ${githubToken}`,
-        'Accept': 'application/vnd.github.v3+json',
+        'Accept': 'application/vnd.github+json',
         'User-Agent': 'Supabase-Function'
       }
     });
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     }
 
     const repos: GitHubRepo[] = await githubResponse.json();
-    console.log(`Found ${repos.length} GitHub repos`);
+    console.log(`Found ${repos.length} GitHub repos (including private if accessible)`);
 
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey);

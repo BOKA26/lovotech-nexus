@@ -57,11 +57,15 @@ Deno.serve(async (req) => {
     const projects = repos
       .filter(repo => !repo.name.includes('lovotech-nexus')) // Exclude this portfolio itself
       .map(repo => {
-        // Determine the project link
-        let projectLink = repo.homepage || repo.html_url;
+        // Determine the project link - prioritize deployed sites
+        let projectLink: string;
         
-        // If no homepage but it's a GitHub Pages repo, construct the URL
-        if (!repo.homepage && repo.name.includes('.github.io')) {
+        if (repo.homepage && repo.homepage.trim() !== '') {
+          // Use homepage if it exists and is not empty
+          projectLink = repo.homepage;
+        } else {
+          // Construct GitHub Pages URL automatically for all repos
+          // Format: https://boka26.github.io/repo-name/
           projectLink = `https://boka26.github.io/${repo.name}/`;
         }
         

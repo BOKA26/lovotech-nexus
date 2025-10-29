@@ -1,37 +1,22 @@
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Projects = () => {
-  const projects = [
-    {
-      title: "Chatbot IA E-commerce",
-      description: "Assistant virtuel intelligent pour une boutique en ligne avec recommandations personnalisées",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
-      tags: ["Chatbot", "IA", "E-commerce"],
-      link: "#"
+  const { data: projects, isLoading, error } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
-    {
-      title: "Automatisation RH",
-      description: "Système automatisé de gestion des candidatures et onboarding des employés",
-      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop",
-      tags: ["Automatisation", "RH", "No-code"],
-      link: "#"
-    },
-    {
-      title: "Plateforme SaaS Formation",
-      description: "Solution complète de formation en ligne avec suivi des progrès et certification",
-      image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&h=600&fit=crop",
-      tags: ["SaaS", "Formation", "Web"],
-      link: "#"
-    },
-    {
-      title: "Dashboard Analytics IA",
-      description: "Tableau de bord intelligent avec analyses prédictives et visualisations avancées",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
-      tags: ["IA", "Analytics", "Dashboard"],
-      link: "#"
-    }
-  ];
+  });
 
   return (
     <section id="projects" className="py-24 bg-gradient-to-b from-secondary/20 to-background">
@@ -45,20 +30,41 @@ const Projects = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <div 
-              key={index}
-              className="group rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300"
-            >
-              <div className="relative overflow-hidden h-64">
-                <img 
-                  src={project.image} 
-                  alt={project.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl overflow-hidden bg-card border border-border">
+                <Skeleton className="h-64 w-full" />
+                <div className="p-6 space-y-4">
+                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-20 w-full" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-20" />
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Erreur lors du chargement des projets</p>
+          </div>
+        ) : projects && projects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {projects.map((project, index) => (
+              <div 
+                key={project.id}
+                className="group rounded-2xl overflow-hidden bg-card border border-border hover:border-primary/50 hover:shadow-xl transition-all duration-300"
+              >
+                <div className="relative overflow-hidden h-64">
+                  <img 
+                    src={project.image} 
+                    alt={project.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
               
               <div className="p-6">
                 <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
@@ -82,9 +88,14 @@ const Projects = () => {
                   <ExternalLink size={16} />
                 </a>
               </div>
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Aucun projet pour le moment</p>
+          </div>
+        )}
       </div>
     </section>
   );

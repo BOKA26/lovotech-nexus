@@ -56,19 +56,29 @@ Deno.serve(async (req) => {
     // Transform and prepare projects for insert
     const projects = repos
       .filter(repo => !repo.name.includes('lovotech-nexus')) // Exclude this portfolio itself
-      .map(repo => ({
-        title: repo.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-        description: repo.description || `Projet ${repo.language || 'GitHub'}`,
-        image: repo.homepage && repo.homepage.includes('unsplash') 
-          ? repo.homepage 
-          : `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop`,
-        tags: [
-          ...(repo.topics || []).slice(0, 3),
-          ...(repo.language ? [repo.language] : [])
-        ].slice(0, 4),
-        link: repo.homepage || repo.html_url,
-        created_at: repo.created_at
-      }));
+      .map(repo => {
+        // Determine the project link
+        let projectLink = repo.homepage || repo.html_url;
+        
+        // If no homepage but it's a GitHub Pages repo, construct the URL
+        if (!repo.homepage && repo.name.includes('.github.io')) {
+          projectLink = `https://boka26.github.io/${repo.name}/`;
+        }
+        
+        return {
+          title: repo.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+          description: repo.description || `Projet ${repo.language || 'GitHub'}`,
+          image: repo.homepage && repo.homepage.includes('unsplash') 
+            ? repo.homepage 
+            : `https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop`,
+          tags: [
+            ...(repo.topics || []).slice(0, 3),
+            ...(repo.language ? [repo.language] : [])
+          ].slice(0, 4),
+          link: projectLink,
+          created_at: repo.created_at
+        };
+      });
 
     console.log(`Prepared ${projects.length} projects for sync`);
 

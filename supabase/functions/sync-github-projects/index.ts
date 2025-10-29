@@ -57,16 +57,18 @@ Deno.serve(async (req) => {
     const projects = repos
       .filter(repo => !repo.name.includes('lovotech-nexus')) // Exclude this portfolio itself
       .map(repo => {
-        // Determine the project link - prioritize deployed sites
+        // Determine the project link - prioritize real deployed sites
         let projectLink: string;
         
         if (repo.homepage && repo.homepage.trim() !== '') {
-          // Use homepage if it exists and is not empty
+          // Use the configured homepage (deployed site)
           projectLink = repo.homepage;
+        } else if (repo.name.endsWith('.github.io') || repo.name === 'boka26.github.io') {
+          // Only construct GitHub Pages URL for actual GitHub Pages repos
+          projectLink = `https://boka26.github.io/${repo.name.replace('.github.io', '')}/`;
         } else {
-          // Construct GitHub Pages URL automatically for all repos
-          // Format: https://boka26.github.io/repo-name/
-          projectLink = `https://boka26.github.io/${repo.name}/`;
+          // Fallback to GitHub repository link if no deployment exists
+          projectLink = repo.html_url;
         }
         
         return {

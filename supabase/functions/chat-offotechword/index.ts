@@ -5,6 +5,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Rate limiting configuration
+const rateLimitMap = new Map<string, number[]>();
+const MAX_REQUESTS = 10; // per minute per IP
+const WINDOW_MS = 60000; // 1 minute
+
+// Cleanup old entries every 5 minutes to prevent memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, timestamps] of rateLimitMap.entries()) {
+    const recent = timestamps.filter(t => now - t < WINDOW_MS);
+    if (recent.length === 0) {
+      rateLimitMap.delete(ip);
+    } else {
+      rateLimitMap.set(ip, recent);
+    }
+  }
+}, 300000);
+
 const SYSTEM_PROMPT = `Tu es OffotechwordBot, l'assistant IA officiel d'Offotechword.
 
 CONTEXTE ENTREPRISE:
@@ -52,6 +70,31 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting check
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    const now = Date.now();
+    const userRequests = rateLimitMap.get(clientIP) || [];
+    const recentRequests = userRequests.filter(t => now - t < WINDOW_MS);
+    
+    if (recentRequests.length >= MAX_REQUESTS) {
+      console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "Trop de requêtes. Veuillez réessayer dans une minute." 
+        }),
+        { 
+          status: 429, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+    
+    // Update rate limit tracker
+    rateLimitMap.set(clientIP, [...recentRequests, now]);
+
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     

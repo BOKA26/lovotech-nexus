@@ -1,10 +1,14 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Projects = () => {
+  const queryClient = useQueryClient();
+  
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -18,6 +22,22 @@ const Projects = () => {
     },
   });
 
+  const syncMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('sync-github-projects');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast.success('Projets GitHub synchronisés avec succès !');
+    },
+    onError: (error) => {
+      console.error('Sync error:', error);
+      toast.error('Erreur lors de la synchronisation des projets');
+    },
+  });
+
   return (
     <section id="projects" className="py-24 bg-gradient-to-b from-secondary/20 to-background">
       <div className="container mx-auto px-4">
@@ -25,9 +45,19 @@ const Projects = () => {
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Projets <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Réalisés</span>
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-muted-foreground mb-6">
             Découvrez quelques-unes de nos réalisations les plus récentes
           </p>
+          <Button 
+            onClick={() => syncMutation.mutate()}
+            disabled={syncMutation.isPending}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+            {syncMutation.isPending ? 'Synchronisation...' : 'Synchroniser depuis GitHub'}
+          </Button>
         </div>
 
         {isLoading ? (

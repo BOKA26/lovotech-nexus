@@ -6,9 +6,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Projects = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("Tous");
   
   const { data: projects, isLoading, error } = useQuery({
@@ -136,13 +138,13 @@ const Projects = () => {
                     ))}
                   </div>
                   
-                  <a 
-                    href={project.link}
+                  <button
+                    onClick={() => navigate(`/project-preview?url=${encodeURIComponent(project.link)}&title=${encodeURIComponent(project.title)}`)}
                     className="inline-flex items-center gap-2 text-primary hover:text-accent transition-colors font-medium"
                   >
                     Voir le projet
                     <ExternalLink size={16} />
-                  </a>
+                  </button>
                 </div>
               </div>
             ))}

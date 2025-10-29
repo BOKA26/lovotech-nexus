@@ -44,12 +44,6 @@ const Navigation = () => {
                 {item.label}
               </button>
             ))}
-            <Button 
-              onClick={() => scrollToSection("chatbot")}
-              className="bg-primary hover:bg-primary/90"
-            >
-              Essayer le chatbot
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,12 +68,6 @@ const Navigation = () => {
                   {item.label}
                 </button>
               ))}
-              <Button 
-                onClick={() => scrollToSection("chatbot")}
-                className="bg-primary hover:bg-primary/90 w-full"
-              >
-                Essayer le chatbot
-              </Button>
             </div>
           </div>
         )}
